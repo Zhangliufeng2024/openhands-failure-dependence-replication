@@ -19,13 +19,19 @@ What is order-invariant and what is not:
 from paths import work, corpus, results
 import json, math, collections, statistics
 
-D = json.load(open(work('instance_repeat.json')))
+D = json.load(open(work('instance_repeat.json'), encoding='utf-8'))
 CNT, RES = D['cnt'], D['res']
 
 n_traj = sum(len(v) for v in RES.values())
 n_task = len(RES)
 n_succ = sum(sum(v) for v in RES.values())
 p = n_succ / n_traj
+
+previous_results = {}
+try:
+    previous_results = json.load(open(results('attempt_axis.json'), encoding='utf-8'))
+except FileNotFoundError:
+    pass
 
 out = {
     'n_trajectories': n_traj,
@@ -35,6 +41,9 @@ out = {
     'attempts_per_task_hist': dict(collections.Counter(CNT.values())),
     'max_attempts': max(CNT.values()),
 }
+for key in ('phi_repo_adjusted', 'phi_submit_only', 'phi_big_only', 'n_allfail_repos'):
+    if key in previous_results:
+        out[key] = previous_results[key]
 
 # ---------- 1. corpus composition ----------
 print("=" * 78)
@@ -72,40 +81,56 @@ out['dispersion_z'] = z
 out['chi2'] = chi2
 out['df'] = df
 
-# ---------- 3. the U-shape, stated plainly ----------
+# ---------- 3. success-count distribution under a length-conditioned null ----------
 print()
 print("=" * 78)
-print("3. 成功数分布 vs 二项零假设（>=5 次尝试的任务）")
+print("3. Success counts vs length-conditioned independence (tasks with >=5 attempts)")
 print("=" * 78)
 n5 = [v for v in RES.values() if len(v) >= 5]
 obs = collections.Counter(sum(v) for v in n5)
-# marginal binomial: match the observed count of successes in the subcorpus
 p5 = sum(sum(v) for v in n5) / sum(len(v) for v in n5)
-print(f"  子语料 n = {len(n5):,} 个任务, p5 = {p5:.4f}")
-print(f"  {'k':>3} {'observed':>10} {'binomial':>12} {'obs/exp':>9}")
 
-M = round(sum(len(v) for v in n5) / len(n5))
+# Each task contributes a Binomial(m_i, p5) distribution using its observed
+# attempt count m_i. This preserves heterogeneous task lengths under the null.
 def binom_pmf(m, k, q):
+    if k < 0 or k > m:
+        return 0.0
     return math.comb(m, k) * q**k * (1 - q)**(m - k)
 
+max_m = max(len(v) for v in n5)
+expected_by_k = [sum(binom_pmf(len(v), k, p5) for v in n5)
+                 for k in range(max_m + 1)]
 rows = []
-for k in range(0, M + 1):
-    exp = len(n5) * binom_pmf(M, k, p5)
-    o = obs.get(k, 0)
-    rows.append((k, o, exp, o / exp if exp > 1e-9 else float('inf')))
-    if k <= 12 or k >= M - 2:
-        print(f"  {k:>3} {o:>10,} {exp:>12,.0f} {rows[-1][3]:>9.2f}")
-out['u_shape'] = [{'k': k, 'obs': o, 'exp': e} for k, o, e, _ in rows]
+print(f"  Subgroup n = {len(n5):,} tasks, attempts = {sum(map(len, n5)):,}, p = {p5:.4f}")
+print(f"  {'successes':>10} {'observed':>10} {'expected':>12} {'obs/exp':>9}")
+for k in range(12):
+    observed = obs.get(k, 0)
+    expected = expected_by_k[k]
+    rows.append({'bin': str(k), 'k': k, 'obs': observed, 'exp': expected, 'ratio': observed / expected})
+    print(f"  {k:>10} {observed:>10,} {expected:>12,.2f} {observed/expected:>9.2f}")
+obs_ge12 = sum(value for k, value in obs.items() if k >= 12)
+exp_ge12 = sum(expected_by_k[12:])
+rows.append({'bin': '≥12', 'k': None, 'obs': obs_ge12, 'exp': exp_ge12, 'ratio': obs_ge12 / exp_ge12})
+print(f"  {'>=12':>10} {obs_ge12:>10,} {exp_ge12:>12,.2f} {obs_ge12/exp_ge12:>9.2f}")
 
 all_fail = sum(1 for v in n5 if sum(v) == 0)
 all_succ = sum(1 for v in n5 if sum(v) == len(v))
-print(f"\n  全失败任务 {all_fail:,} ({all_fail/len(n5):.1%})"
-      f"   二项期望 {len(n5)*binom_pmf(M,0,p5):,.0f}")
-print(f"  全成功任务 {all_succ:,} ({all_succ/len(n5):.1%})"
-      f"   二项期望 {len(n5)*binom_pmf(M,M,p5):,.0f}")
+all_fail_exp = sum((1 - p5) ** len(v) for v in n5)
+all_succ_exp = sum(p5 ** len(v) for v in n5)
+print(f"\n  All-failure tasks {all_fail:,} ({all_fail/len(n5):.1%}); expected {all_fail_exp:,.2f} ({all_fail_exp/len(n5):.2%})")
+print(f"  All-success tasks {all_succ:,} ({all_succ/len(n5):.1%}); expected {all_succ_exp:,.2f} ({all_succ_exp/len(n5):.2%})")
+out['u_shape'] = rows
 out['all_fail_tasks'] = all_fail
 out['all_succ_tasks'] = all_succ
+out['all_fail_expected'] = all_fail_exp
+out['all_succ_expected'] = all_succ_exp
+out['all_fail_expected_rate'] = all_fail_exp / len(n5)
+out['all_succ_expected_rate'] = all_succ_exp / len(n5)
 out['n5'] = len(n5)
+out['n5_attempts'] = sum(map(len, n5))
+out['n5_successes'] = sum(sum(v) for v in n5)
+out['p5'] = p5
+out['null_model'] = 'Task-length-conditioned independent Bernoulli calls; each task retains its observed attempt count.'
 
 # ---------- 4. the statistic we must NOT use ----------
 print()
@@ -137,8 +162,8 @@ print("  不可支持：CCRM 的 epsilon_1/epsilon_0 = 7.1x 这一具体比值�
 print("            该量要求给定「第 1 次尝试失败」这一事件，而尝试序号不可恢复。")
 print("  不可支持：任何以「前一次尝试」为条件的转移率。")
 
-json.dump(out, open(results('attempt_axis.json'), 'w'),
-          indent=1)
+json.dump(out, open(results('attempt_axis.json'), 'w', encoding='utf-8'),
+          indent=1, ensure_ascii=False)
 print("\nwrote attempt_axis.json")
 
 # ============================================================================
@@ -202,6 +227,6 @@ print(f"  6d. 全失败任务散落于 {len(af)} 个 repo，"
 
 out.update({'phi_repo_adjusted': phi_repo, 'phi_submit_only': phi_sub,
             'phi_big_only': phi_big, 'n_allfail_repos': len(af)})
-json.dump(out, open(results('attempt_axis.json'), 'w'),
-          indent=1)
+json.dump(out, open(results('attempt_axis.json'), 'w', encoding='utf-8'),
+          indent=1, ensure_ascii=False)
 print("\n  所有稳健性检验均未削弱结论。")

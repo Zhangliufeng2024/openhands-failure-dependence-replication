@@ -1,6 +1,6 @@
 Table 5. Lag-1 association stratified on cumulative failures (same-tool pairs).
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 491)
+(source: Manuscript_EMSE_Submission_Ready.md, line 491)
 ========================================================================================
 
 --------------------------------------------------------------------------------

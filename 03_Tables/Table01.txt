@@ -1,6 +1,6 @@
 Table 1. Corpus description (full SWE-rebench OpenHands trajectories).
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 384)
+(source: Manuscript_EMSE_Submission_Ready.md, line 384)
 ========================================================================================
 
 --------------------------------------------------------------------------------

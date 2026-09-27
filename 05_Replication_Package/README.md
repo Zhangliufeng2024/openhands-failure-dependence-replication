@@ -2,7 +2,7 @@
 
 **Paper:** Two Scales of Failure Dependence in LLM Agent Trajectories:
 Step-Level Self-Excitation and Attempt-Level Clustering in 67,074 OpenHands Runs
-**Version:** v3.7 ｜ **Date:** 2026-09-26
+**Version:** v3.7 ｜ **Date:** 2026-09-27
 **Target:** Empirical Software Engineering special issue “Agentic Software Engineering: The Rise of AI Teammates”
 
 ---
@@ -11,7 +11,7 @@ Step-Level Self-Excitation and Attempt-Level Clustering in 67,074 OpenHands Runs
 
 | Directory | Contents | Files |
 |---|---|---|
-| `01_code` | Analysis, figure, and document-build scripts | 28 |
+| `01_code` | Analysis, figure, and author-side document QA/build scripts | 28 |
 | `02_derived_data` | Derived data that cannot be cheaply regenerated | 4 |
 | `03_results` | Machine-readable outputs of every script | 11 |
 | `04_environment` | Environment spec and data provenance | — |
@@ -101,11 +101,10 @@ python3 01_code/make_figs.py         # Figures 1, 2, 3, 5  (300 dpi)
 python3 01_code/make_fig5.py         # Figure 4  (Simpson's paradox)
 python3 01_code/make_fig6.py         # Figure 6  (attempt axis)
 
-# ---- Stage 6: numeric reconciliation and document build -----------------
-python3 01_code/final_audit.py
-#   expected:  数值核对失败: 0 / 83
-python3 01_code/build_docx.py        # -> 01_Manuscript/Manuscript_Paper3_v3.7.docx
-python3 01_code/extract_tables.py    # -> 03_Tables/Table01..18.txt
+# ---- Stage 6: author-side table audit (requires local manuscript files) ---
+python3 01_code/final_audit.py path/to/manuscript.md path/to/manuscript.docx
+# Manuscript files are intentionally not included in this public repository.
+# build_docx.py and extract_tables.py likewise require a local manuscript source.
 ```
 
 Every random seed is fixed inside the scripts. Total runtime for the full chain,
@@ -134,7 +133,7 @@ Use these to check that reproduction succeeded.
 | φ, repo difficulty absorbed | 8.60 | `attempt_axis.json` |
 | φ, runtime failures removed | 8.88 | `attempt_axis.json` |
 | **Attempt-level ICC** | **0.797** | `attempt_axis.json` |
-| All-failure / all-success tasks | 2,441 / 1,990 | `attempt_axis.json` |
+| All-failure / all-success tasks (observed; length-conditioned expectation) | 2,441 / 1,990; 27.80 / 15.87 expected | `attempt_axis.json` |
 | Repositories spanned by all-failure tasks | 917 | `attempt_axis.json` |
 | editor strict-label precision | 0.113 | `editor_label.json` |
 | Strictly judged adjacent editor pairs | 545,446 | `editor_label.json` |
@@ -192,10 +191,10 @@ Section 5.
 
 | Check | Result |
 |---|---|
-| Numeric reconciliation (`final_audit.py`) | all listed manuscript values are compared with the bundled measured values and tolerances |
+| Table audit (`final_audit.py`) | requires local manuscript Markdown and DOCX files; these are intentionally omitted |
 | Figures | 6, all 6.30 in wide at 300 dpi, RGB (meets the ≥300 dpi colour requirement) |
 | Tables | 18, contiguous numbering, all bodies present |
-| Tables/figures cross-referenced in the manuscript | consistent |
+| Manuscript cross-references | not included in this code/data repository |
 
 ---
 

@@ -8,7 +8,7 @@ import io, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_Paper3_v3.7_source.md')
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_EMSE_Submission_Ready.md')
 OUTDIR = os.path.join(ROOT, '03_Tables')
 
 lines = io.open(SRC, encoding='utf-8').read().split('\n')

@@ -1,6 +1,6 @@
 Table 8. Within-trajectory paired contrast, first half vs. second half of calls.
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 610)
+(source: Manuscript_EMSE_Submission_Ready.md, line 610)
 ========================================================================================
 
 --------------------------------------------------------------------------------

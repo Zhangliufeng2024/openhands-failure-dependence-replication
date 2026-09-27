@@ -1,22 +1,16 @@
 Table 17. Failure dependence at the step scale and at the attempt scale.
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 1336)
+(source: Manuscript_EMSE_Submission_Ready.md, line 1341)
 ========================================================================================
 
 --------------------------------------------------------------------------------
-                                Step axis            Attempt axis
+Dimension                 Step axis                              Attempt axis
 --------------------------------------------------------------------------------
-Unit                            tool call            whole attempt
-Count                           4,012,730 calls      67,074 attempts, 6,306 tasks
-Dependence                      OR 1.49×–1.92×       *φ* = 8.71, *z* = 431.9
-Intraclass correlation          0.054                0.797
-Decay                           exponential kernel,  not estimable
-                                half-life 5–10 steps
-Locality                        tool-local           not tool-local
-                                (cross-tool         (present across 917
-                                 1.03×–1.26×)       repositories)
-Survives controls               pooling, damage      repository difficulty
-                                accumulation,        (8.71 → 8.60),
-                                labels, command type     runtime failure
-                                                     (8.71 → 8.88)
+Unit                      Tool call                              Whole task attempt
+Count                     4,012,730 calls                        67,074 attempts across 6,306 tasks
+Dependence                OR 1.49×–1.92×                         *φ* = 8.71; *z* = 431.9
+Intraclass correlation    0.054                                   0.797
+Decay                     Exponential; half-life 5–10 steps      Not estimable (attempt order unavailable)
+Locality                  Mostly tool-local                      Not tool-local; observed across 917 repositories
+Robustness                Pooling, damage, labels, command-type controls     *φ* = 8.60 repo-adjusted; *φ* = 8.88 submit-only
 --------------------------------------------------------------------------------

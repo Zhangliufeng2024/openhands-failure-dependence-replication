@@ -12,4 +12,4 @@ No GPU is required. Peak memory during extraction is approximately 3 GB when
 streaming trajectories.parquet row group by row group; the full file is 2.08 GB
 on disk.
 
-Final package checks on 2026-09-27: numeric reconciliation of the v3.7 manuscript source and bundled result files passed 83/83 checks on Python 3.12.14. The DOCX was rebuilt and its structure confirmed (18 tables, 6 embedded figures). The full statistical pipeline was not rerun in this final pass. Earlier environment checks recorded above describe prior builds, not this final validation.
+Final package checks on 2026-09-27: the submission-ready DOCX was rebuilt and exported through Microsoft Word to a 27-page A4 PDF for visual inspection. The cell-level audit passed for all 18 tables; Table 16’s 13 bins and all-failure/all-success expectations were recomputed from the shipped instance_repeat.json. Figure 4 and Figure 6 were regenerated from shipped results. The source-corpus-dependent robustness pipeline was not rerun because the 2.08 GB upstream corpus is intentionally not redistributed.

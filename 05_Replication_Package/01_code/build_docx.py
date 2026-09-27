@@ -20,8 +20,8 @@ from docx.opc.constants import RELATIONSHIP_TYPE as RT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..', '..'))
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_Paper3_v3.7_source.md')
-OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_Paper3_v3.7.docx')
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_EMSE_Submission_Ready.md')
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, '01_Manuscript', 'Manuscript_EMSE_Submission_Ready.docx')
 FIGDIR = os.path.join(ROOT, '02_Figures')
 
 SERIF, MONO, EASIA = 'Times New Roman', 'Consolas', '宋体'
@@ -120,6 +120,7 @@ def heading(text, level):
 
 def body(text):
     p = doc.add_paragraph()
+    p.paragraph_format.keep_together = True
     add_rich(p, text)
 
 def caption(text):
@@ -163,83 +164,104 @@ def set_cell_border(cell, edge, sz):
     el.set(qn('w:val'), 'single'); el.set(qn('w:sz'), str(sz)); el.set(qn('w:color'), '000000')
 
 def split_row(line):
-    """Split a space-aligned row into (start_col, text) cells."""
-    cells, pos = [], 0
-    for m in re.finditer(r'\s{2,}', line):
-        cells.append((pos, line[pos:m.start()].strip()))
-        pos = m.end()
-    cells.append((pos, line[pos:].strip()))
-    return cells
-
-def col_of(start, bounds):
-    return max(i for i, b in enumerate(bounds) if start + 1 >= b)
+    """Split a space-aligned row into ordered cell values."""
+    return [part.strip() for part in re.split(r'\s{2,}', line.strip()) if part.strip()]
 
 def build_table(groups):
     hdr_lines = groups[0]
-    # column boundaries from the last header line; column 0 always exists
-    bounds = sorted(set([0] + [c[0] for c in split_row(hdr_lines[-1]) if c[1] != '' and c[0] > 0]))
-    ncols = len(bounds)
+    ncols = len(split_row(hdr_lines[-1]))
+    if not ncols:
+        raise ValueError('table has an empty header')
 
-    def assign(line):
-        row = [''] * ncols
-        for start, txt in split_row(line):
-            if txt:
-                i = col_of(start, bounds)
-                row[i] = (row[i] + '\n' + txt).strip() if row[i] else txt
-        return row
+    # A header row either names every column or uses equally sized group spans.
+    headers = []
+    for ln in hdr_lines:
+        values = split_row(ln)
+        if len(values) == ncols:
+            headers.append((values, 1))
+        elif values and ncols % len(values) == 0:
+            headers.append((values, ncols // len(values)))
+        else:
+            raise ValueError(f'header has {len(values)} cells; expected {ncols}: {ln!r}')
 
-    # header: one row per header line, merging spans for panel titles
-    hdr_rows = [assign(h) for h in hdr_lines]
-    # data rows + notes (a non-indented single-cell line is a table note)
+    # Preserve order and reject malformed data rows instead of guessing cells.
     data, notes = [], []
-    for g in groups[1:]:
-        for ln in g:
-            ncells = sum(1 for _, t in split_row(ln) if t)
-            if not ln.startswith(' ') and ncells < 2:
-                if ln.strip():
-                    notes.append(ln.strip())
+    for group in groups[1:]:
+        for ln in group:
+            values = split_row(ln)
+            if not values:
                 continue
-            row = assign(ln)
-            if ln.startswith(' ') and data:
-                prev = data[-1]
-                for i, v in enumerate(row):
-                    if v:
-                        prev[i] = (prev[i] + '\n' + v).strip() if prev[i] else v
-            else:
-                data.append(row)
+            if len(values) == 1 and not ln.startswith(' '):
+                notes.append(values[0])
+                continue
+            if len(values) != ncols:
+                raise ValueError(f'data row has {len(values)} cells; expected {ncols}: {ln!r}')
+            data.append(values)
 
     tbl = doc.add_table(rows=0, cols=ncols)
     tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    tbl.autofit = True
-    for hr in hdr_rows:
+    tbl.autofit = False
+
+    # Keep the table within the A4 text width. Long labels receive more room;
+    # numeric columns stay compact and wrap only when needed.
+    def display_width(value):
+        return len(re.sub(r'[*_`{}]', '', value))
+
+    weights = []
+    for i in range(ncols):
+        candidates = [display_width(row[i]) for row in data]
+        candidates.extend(display_width(row[i]) for row, span in headers if span == 1)
+        weights.append(max(5, min(34, max(candidates or [8]))))
+    table_width_twips = Inches(6.27).twips
+    weight_sum = sum(weights)
+    col_widths = [int(table_width_twips * weight / weight_sum) for weight in weights]
+    col_widths[-1] += table_width_twips - sum(col_widths)
+    for col, width_twips in zip(tbl.columns, col_widths):
+        col.width = Pt(width_twips / 20)
+
+    for values, span in headers:
         row = tbl.add_row()
-        for i, v in enumerate(hr):
-            if i >= ncols: break
-            p = row.cells[i].paragraphs[0]
-            p.paragraph_format.space_after = Pt(2)
-            add_rich(p, v, size=9, bold=True)
-    # merge spans for upper header rows (e.g. Table 5's tool-name row)
-    for ri, hr in enumerate(hdr_rows[:-1]):
-        starts = [(c[0], c[1]) for c in split_row(hdr_lines[ri]) if c[1]]
-        for si, (st, txt) in enumerate(starts):
-            i0 = col_of(st, bounds)
-            if si + 1 < len(starts):
-                i1 = col_of(starts[si + 1][0], bounds) - 1
+        for j, value in enumerate(values):
+            i = j * span
+            cell = row.cells[i]
+            if span > 1:
+                cell = cell.merge(row.cells[i + span - 1])
+                cell.width = Inches(sum(col_widths[i:i + span]) / 1440)
             else:
-                i1 = ncols - 1
-            if i1 > i0:
-                tbl.cell(ri, i0).merge(tbl.cell(ri, i1))
-    for row in data:
-        trow = tbl.add_row()
-        for i, v in enumerate(row):
-            if i >= ncols: break
-            p = trow.cells[i].paragraphs[0]
+                cell.width = Pt(col_widths[i] / 20)
+            p = cell.paragraphs[0]
             p.paragraph_format.space_after = Pt(2)
-            add_rich(p, v, size=9)
-    # booktabs rules
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            add_rich(p, value, size=8.5, bold=True)
+
+    numeric_pattern = r'[+\-−–—<>≥≤=0-9.,%:/()\[\] χφε*^_{}×x]+'
+    for values in data:
+        row = tbl.add_row()
+        for i, value in enumerate(values):
+            cell = row.cells[i]
+            cell.width = Pt(col_widths[i] / 20)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(1)
+            p.paragraph_format.line_spacing = 1.0
+            if i > 0 and re.fullmatch(numeric_pattern, value) and re.search(r'\d', value):
+                p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            add_rich(p, value, size=8.5)
+
+    # Repeat headers and prevent individual rows from splitting across pages.
+    for ri, row in enumerate(tbl.rows):
+        trPr = row._tr.get_or_add_trPr()
+        trPr.append(OxmlElement('w:cantSplit'))
+        if ri < len(headers):
+            repeat = OxmlElement('w:tblHeader')
+            repeat.set(qn('w:val'), 'true')
+            trPr.append(repeat)
+
+    # Booktabs-style horizontal rules; no vertical grid lines.
     for cell in tbl.rows[0].cells:
         set_cell_border(cell, 'top', 12)
-    for cell in tbl.rows[len(hdr_rows) - 1].cells:
+    for cell in tbl.rows[len(headers) - 1].cells:
         set_cell_border(cell, 'bottom', 6)
     for cell in tbl.rows[-1].cells:
         set_cell_border(cell, 'bottom', 12)
@@ -300,6 +322,8 @@ while i < n:
     if re.match(r'^Table \d+\.', s) and i + 1 < n and is_sep(lines[i + 1]):
         cap, i = para_until_blank(i)
         caption(cap)
+        if re.match(r'^Table 18\.', cap):
+            doc.paragraphs[-1].paragraph_format.page_break_before = True
         groups, cur = [], []
         while i < n and lines[i].strip():
             ln = lines[i]
@@ -317,6 +341,12 @@ while i < n:
 
     if s in ('Abstract', 'References') or s.startswith('Appendix '):
         heading(s, 1); stats['headings'] += 1; i += 1; continue
+
+    if s in ('Acknowledgments', 'Statements and Declarations'):
+        heading(s, 1); stats['headings'] += 1; i += 1; continue
+
+    if s in ('Competing interests', 'Funding', 'Data and code availability'):
+        heading(s, 2); stats['headings'] += 1; i += 1; continue
 
     if re.match(r'^\d+\.\d+\s+[A-Z]', s) and len(s) < 90 and not s.rstrip().endswith(('.', ',', ';')):
         heading(s, 2); stats['headings'] += 1; i += 1; continue

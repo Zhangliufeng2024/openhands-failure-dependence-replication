@@ -1,13 +1,13 @@
 Table 4. Same-tool and cross-tool lag-1 association (lenient label).
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 472)
+(source: Manuscript_EMSE_Submission_Ready.md, line 472)
 ========================================================================================
 
 --------------------------------------------------------------------------------
 Direction                              *P*(f|f)   *P*(f|s)   Ratio
 --------------------------------------------------------------------------------
 `execute_bash` to `execute_bash`            0.4085   0.2751   1.485×
-`str_replace_editor` to `str_replace_editor` 0.4265   0.2220   1.921×
+`str_replace_editor` to `str_replace_editor`   0.4265   0.2220   1.921×
 `execute_bash` to `str_replace_editor`      0.2924   0.2324   1.258×
 `str_replace_editor` to `execute_bash`      0.3552   0.3442   1.032×
 --------------------------------------------------------------------------------

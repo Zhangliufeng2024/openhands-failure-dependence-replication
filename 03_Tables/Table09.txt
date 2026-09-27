@@ -1,6 +1,6 @@
 Table 9. Within-trajectory paired contrast, holding command type fixed.
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 643)
+(source: Manuscript_EMSE_Submission_Ready.md, line 643)
 ========================================================================================
 
 --------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 Table 3. Within-tool lag-1 association, observed vs. within-trajectory shuffle null.
 ========================================================================================
-(source: Manuscript_Paper3_v3.7_source.md, line 451)
+(source: Manuscript_EMSE_Submission_Ready.md, line 451)
 ========================================================================================
 
 --------------------------------------------------------------------------------
