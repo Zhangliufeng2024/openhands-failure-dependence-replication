@@ -3,7 +3,7 @@
 **Paper:** Two Scales of Failure Dependence in LLM Agent Trajectories:
 Step-Level Self-Excitation and Attempt-Level Clustering in 67,074 OpenHands Runs
 **Version:** v3.7 ｜ **Date:** 2026-09-26
-**Target:** EMSE Open Science Initiative (replication package)
+**Target:** Empirical Software Engineering special issue “Agentic Software Engineering: The Rise of AI Teammates”
 
 ---
 
