@@ -1,0 +1,17 @@
+Table 9. Within-trajectory paired contrast, holding command type fixed.
+========================================================================================
+(source: Manuscript_Paper3_v3.7_source.md, line 643)
+========================================================================================
+
+--------------------------------------------------------------------------------
+Layer                    First half   Second half   Diff       t       *n* traces
+--------------------------------------------------------------------------------
+bash, non-test              0.2743       0.3211     +0.0467   +53.1    66,132
+bash, test and build       0.3672       0.3242     −0.0430   −27.0    33,224
+editor, `view`                0.2806       0.3504     +0.0697   +67.5    65,172
+editor, `create`              0.0099       0.0056     −0.0043    −8.8    13,285
+editor, `str_replace`         0.3904       0.3947     +0.0043    +1.6    13,685
+--------------------------------------------------------------------------------
+Bootstrap 95% CIs (1,000 trajectory resamples) exclude zero in every layer except
+editor, `str_replace`, whose interval is [−0.0010, +0.0096]. The *n* column counts
+trajectories contributing at least one call to both halves of that layer.

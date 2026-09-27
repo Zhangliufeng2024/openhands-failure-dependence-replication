@@ -1,0 +1,13 @@
+Table 18. Where each research question is answered.
+========================================================================================
+(source: Manuscript_Paper3_v3.7_source.md, line 1390)
+========================================================================================
+
+--------------------------------------------------------------------------------
+Question            Evidence           Headline statistic             Verdict
+--------------------------------------------------------------------------------
+Q1 (Existence)      Sections 4.1–4.2   OR 1.567 pooled, 1.573 within; same-tool 1.485×–1.921×   Yes; within-trajectory
+Q2 (Localisation)   Section 4.2        cross-tool 1.258× and 1.032×                        Largely tool-local
+Q3 (Mechanism)      Sections 4.4, 4.6  half-life 10.2 steps (bash), 4.8 (editor); drift +0.0324   Self-exciting kernel
+Q4 (Scale)          Sections 5, 6.6    step ICC 0.054 vs attempt ICC 0.797; *φ* = 8.71       Not interchangeable
+--------------------------------------------------------------------------------

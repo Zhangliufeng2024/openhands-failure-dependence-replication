@@ -1,0 +1,24 @@
+{
+ "pairs": {
+  "strict": [
+   22385,
+   100359,
+   76937,
+   541624
+  ],
+  "lenient": [
+   82451,
+   202296,
+   120825,
+   439687
+  ]
+ },
+ "cross": {
+  "(False, False, True)": 63483,
+  "(True, True, False)": 77974,
+  "(False, True, False)": 88483,
+  "(False, False, False)": 376204,
+  "(False, True, True)": 13454,
+  "(True, True, True)": 22385
+ }
+}

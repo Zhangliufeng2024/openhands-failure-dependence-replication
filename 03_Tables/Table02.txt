@@ -1,0 +1,17 @@
+Table 2. Lag-1 failure association, pooled vs. within-trajectory.
+========================================================================================
+(source: Manuscript_Paper3_v3.7_source.md, line 411)
+========================================================================================
+
+--------------------------------------------------------------------------------
+Quantity                                                    Value
+--------------------------------------------------------------------------------
+*P*(fail | previous success)                                 0.2679
+*P*(fail | previous failure)                                 0.3645
+Ratio                                                      1.360×
+Pooled lag-1 odds ratio                                    1.567
+Observation-weighted mean within-trajectory OR             1.573
+Between-trajectory multiplier                              0.996
+Discordant pairs, failure → success                     735,231
+Discordant pairs, success → failure                     747,218
+--------------------------------------------------------------------------------

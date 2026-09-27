@@ -1,0 +1,7 @@
+# Replication package environment (tested configuration)
+# Python 3.11.1, Linux x86-64
+pyarrow>=14
+numpy>=1.26
+pandas>=2.0
+matplotlib>=3.8
+python-docx>=1.1

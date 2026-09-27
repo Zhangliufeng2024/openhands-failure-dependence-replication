@@ -1,0 +1,51 @@
+======================= SOURCE CORPUS =======================
+
+Dataset      nebius/SWE-rebench-openhands-trajectories
+Landing      https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories
+Mirror used  https://www.modelscope.cn/datasets/nebius/SWE-rebench-openhands-trajectories
+Revision     35455389ab51
+Last modified 2025-12-27
+License      CC-BY-4.0
+File         trajectories.parquet
+Byte length  2,079,503,354
+Rows         67,074
+Row groups   17
+Columns      17
+
+Integrity    The mirror's byte length matches the x-linked-size reported by the
+             Hugging Face API exactly, confirming an identical object.
+
+Tags present trajectory_id, instance_id, repo, trajectory, tools, model_patch,
+             exit_status, resolved, gen_tests_correct, pred_passes_gen_tests
+
+=================== COLLECTION CONDITIONS ===================
+
+Agent        OpenHands v0.54.0
+Model        Qwen3-Coder-480B-A35B-Instruct
+Coverage     1,823 repositories; 3,792 real-world issues
+Outcomes     32,161 resolved / 34,913 unresolved trajectories
+
+================== OUR DERIVED STRUCTURE ====================
+
+Trajectories            67,074
+Distinct instance_id     6,306
+Mean attempts per task   10.64  (max 34)
+Tasks with >= 2 attempts 6,282  (99.6%)
+
+NOTE  The provider does not document the attempt structure. It was established
+      by us (all 17 row groups streamed). Its discovery corrected a factual
+      error in an earlier version of the manuscript; see Appendix B.
+
+===================== ROW-ORDER CAVEAT =====================
+
+Rows are NOT ordered by attempt. trajectory_id is an opaque hash with no
+timestamp, so repeated attempts at one task are not adjacent in the file
+(example: PlasmaFAIR__sdf-xarray-24 at rows 0 and 2,398). Attempt ORDER is
+therefore unrecoverable from the released file.
+
+Consequences:
+  - CCRM's ε₁/ε₀ = 7.1× is not computable (it conditions on the
+    first attempt having failed).
+  - Any transition rate keyed on "the previous attempt" is meaningless. Computed
+    naively on row order it yields a ratio of 0.111, an apparent nine-fold
+    cascade that is entirely artifactual.

@@ -1,0 +1,17 @@
+Table 1. Corpus description (full SWE-rebench OpenHands trajectories).
+========================================================================================
+(source: Manuscript_Paper3_v3.7_source.md, line 384)
+========================================================================================
+
+--------------------------------------------------------------------------------
+Metric                                                              Value
+--------------------------------------------------------------------------------
+Trajectories                                                         67,074
+Total tool calls                                                  4,249,707
+Interactive tool calls (bash + editor)                            4,012,730
+Mean trajectory length (interactive calls)                             59.8
+Resolved trajectories                                                32,161
+Unresolved trajectories                                              34,913
+Resolved-trajectory failure rate                                     0.283
+Unresolved-trajectory failure rate                                   0.298
+--------------------------------------------------------------------------------
